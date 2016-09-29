@@ -1,0 +1,49 @@
+body {
+	background: #2e505d;
+}
+
+#pong {
+	background: #272727;
+	position: relative;
+	height: 500px;
+	width: 890px;
+	top: 50px;
+	left: 50%;
+	transform: translateX(-50%);
+}
+
+#scores div {
+	color: #2e505d;
+	font-size: 70px;
+	display: inline-block;
+	margin: 0 15px;
+	font-family: arial;
+}
+
+#scores div:last-child {
+	float: right;
+}
+
+.paddle {
+	position: absolute;
+	height: 80px;
+	width: 30px;
+	background: #0095ff;
+	top: 210px;
+}
+
+#paddle1 {
+	left: 0;
+}
+
+#paddle2 {
+	right: 0;
+}
+
+#ball {
+	position: absolute;
+	height: 20px;
+	width: 20px;
+	right: 50%;
+	background: #fff;
+}
