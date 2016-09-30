@@ -18,8 +18,11 @@ var ball = {
 	height: 20,
 	left: 426,
 	top: 100,
-	dX: 4,
-	dY: 4
+	startingSpeed: 4,
+	speed: 4,
+	dX: -1,
+	dY: 1,
+	totalBounces: 0 // use to determine ball speed
 }
 
 var paddle1 = {
@@ -37,7 +40,8 @@ var paddle2 = {
 	width: 30,
 	top: 210,
 	dY: 0,
-	speed: 1
+	speed: 5,
+	trackDistance: 530 // decrease to make computer see further (harder to beat)
 }
 
 function pause() {
@@ -49,6 +53,13 @@ function unpause() {
 		paused = false;
 		window.requestAnimationFrame(gameLoop)
 	}
+}
+
+function resetGame(){
+	ball.top = 190;
+    ball.left = 432;
+    pause();
+	setTimeout(unpause, 1500);
 }
 
 function gameLoop() {
@@ -66,6 +77,7 @@ function update() {
 	updatePaddle1Pos()
 	updatePaddle2Pos()
 	updateBallPos()
+	updateBallSpeed()
 	checkPaddle1Collision()
 	checkPaddle2Collision()
 }
@@ -97,17 +109,25 @@ document.onkeydown = function(e) {
 }
 
 function paddle2TrackBall() {
-	// move in the wrong direction every once in a while
-	if (Math.random() > 0.3) {
-		var reverse = true;
-	}
-	var paddle2Bottom = paddle2.height + paddle2.top;
-	if (ball.top < paddle2.top) {
-		paddle2.dY = !reverse ? -paddle2.speed : paddle2.speed;
-	} else if (ball.top > paddle2Bottom - ball.height) {
-		paddle2.dY = !reverse ? paddle2.speed : -paddle2.speed;
+	if (ball.left > paddle2.trackDistance) {
+		var paddle2Bottom = paddle2.height + paddle2.top;
+		if (ball.top < paddle2.top) {
+			// move up
+			paddle2.dY =  -paddle2.speed;
+		} else if (ball.top > paddle2Bottom - ball.height) {
+			// move down
+			paddle2.dY = paddle2.speed
+		} else {
+			paddle2.dY = ball.dY;
+		}
 	} else {
-		paddle2.dY = ball.dY;
+		if (paddle2.top > 210) {
+			paddle2.dY = -paddle2.speed * .2;
+		} else if (paddle2.top < 210) {
+			paddle2.dY = paddle2.speed * .2;
+		} else {
+			paddle2.dY = 0
+		}
 	}
 }
 
@@ -150,22 +170,36 @@ function drawPaddle2() {
 }
 
 function updateBallPos() {
-	ball.top += ball.dY
-	ball.left += ball.dX
+	ball.top += ball.dY * ball.speed
+	ball.left += ball.dX * ball.speed
 
 	if (ball.top > 480 || ball.top < 0) {
 		ball.dY = -ball.dY
+		ball.totalBounces++;
 	}
 
 	if (ball.left > 870 || ball.left < 0) {
 		if (ball.left < 0) {
-		// if ball.left is 0, enemy scored
-		scores.score2.score++;
+			// if ball.left is 0, enemy scored
+			scores.score2.score++;
+			resetGame();
 		} else {
 			// if ball.left is 870, you scored
 			scores.score1.score++;
+			// make enemy harder
+			// debugger
+			paddle2.trackDistance -= 10;
+			resetGame();
 		}
 		ball.dX = -ball.dX
+	}
+}
+
+function updateBallSpeed() {
+	if (ball.totalBounces > 0 && ball.totalBounces % 10 === 0 && ball.totalBounces < 100) {
+		// increase ball speed by 1 every 10 bounces
+		var newSpeed = ball.totalBounces / 10 + ball.startingSpeed;
+		ball.speed = newSpeed;
 	}
 }
 
